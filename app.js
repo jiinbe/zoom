@@ -113,3 +113,7 @@ link.click();
 
 $(window).resize(resizeCanvas);
 resizeCanvas(); // Resize the canvas to fit the container size initially
+
+function selectFile() {
+  document.getElementById("imageUpload").click();
+}
