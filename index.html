@@ -79,7 +79,37 @@ width: auto;
 <p>
 <input type="range" id="zoomControl" min="0.1" max="2" value="1" step="0.1">
 </p>
-
+<!-- Group for Zoom and Joystick controls -->
+<div class="controls-container">
+<!-- Slider untuk Zoom -->
+<div class="slider-container">
+<label for="zoomControl">Zoom:</label>
+<input type="range" id="zoomControl" min="0.1" max="2" value="1" step="0.1">
+</div>
+    
+<!-- Joystick controls structured like a PlayStation controller -->
+<div class="joystick-container">
+<div class="joystick-row">
+<div class="joystick-spacer"></div>
+<button id="moveUp" class="btn btn-primary">↑</button>
+<div class="joystick-spacer"></div>
+</div>
+<div class="joystick-row">
+<button id="moveLeft" class="btn btn-primary">←</button>
+<div class="joystick-spacer"></div>
+<button id="moveRight" class="btn btn-primary">→</button>
+</div>
+<div class="joystick-row">
+<div class="joystick-spacer"></div>
+<button id="moveDown" class="btn btn-primary">↓</button>
+<div class="joystick-spacer"></div>
+</div>
+</div>
+</div>
+    
+<!-- Other content goes here... -->
+</div>
+  
 <p>
 <button id="saveImage">Download</button>
 </p>
