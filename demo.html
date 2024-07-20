@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rojali Flowerful Twibbon</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<style>
+    #canvasContainer {
+        width: 100%;
+        max-width: 500px; /* Maximum size */
+        margin: auto;
+        border: 1px solid #ddd;
+        position: relative;
+        overflow: hidden;
+    }
+    canvas {
+        width: 100%;
+        height: auto;
+    }
+    .joystick-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .joystick-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .joystick-btn {
+        margin: 3px; /* Smaller spacing */
+        width: 30px; /* Smaller width */
+        height: 30px; /* Smaller height */
+        /* ... other styles ... */
+    }
+
+    .joystick-spacer {
+        width: 30px; /* Same as the button for alignment */
+        height: 30px; /* Same as the button for alignment */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .controls-container {
+        display: flex;
+        justify-content: center; /* Center the controls horizontally */
+        align-items: center;
+    }
+    /* Adjust the slider width to align with the new joystick */
+    .slider-container {
+        
+        margin-right: 30px; /* Add some space between slider and joystick */
+    }
+    #saveImage {
+        display: block; /* Make the button a block element */
+        margin: 20px auto; /* Centering it with auto margin */
+    }
+</style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2 class="mb-4">Rojali Flowerful Twibbon</h2>
+    <div class="custom-file mb-3">
+        <input type="file" class="custom-file-input" id="imageUpload" accept="image/*">
+        <label class="custom-file-label" for="imageUpload">Pilih foto...</label>
+    </div>
+    <div id="canvasContainer">
+        <canvas id="canvas"></canvas>
+    </div>
+    <div class="container mt-5">
+        <!-- Group for Zoom and Joystick controls -->
+        <div class="controls-container">
+            <!-- Slider untuk Zoom -->
+            <div class="slider-container">
+                <label for="zoomControl">Zoom:</label>
+                <input type="range" id="zoomControl" min="0.1" max="2" value="1" step="0.1">
+            </div>
+    
+            <!-- Joystick controls structured like a PlayStation controller -->
+            <div class="joystick-container">
+                <div class="joystick-row">
+                    <div class="joystick-spacer"></div>
+                    <button id="moveUp" class="btn btn-primary">↑</button>
+                    <div class="joystick-spacer"></div>
+                </div>
+                <div class="joystick-row">
+                    <button id="moveLeft" class="btn btn-primary">←</button>
+                    <div class="joystick-spacer"></div>
+                    <button id="moveRight" class="btn btn-primary">→</button>
+                </div>
+                <div class="joystick-row">
+                    <div class="joystick-spacer"></div>
+                    <button id="moveDown" class="btn btn-primary">↓</button>
+                    <div class="joystick-spacer"></div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Other content goes here... -->
+    </div>
+     
+    <div class="text-center">
+        <button class="btn btn-primary" id="saveImage">Download</button>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script>
+// JavaScript to handle image processing
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+var image = new Image();
+var twibbon = new Image();
+var scale = 1;
+var position = { x: 0, y: 0 };
+var dragStart, dragged;
+// JavaScript untuk menangani pergerakan gambar
+var MOVE_AMOUNT = 10; // Jumlah piksel gambar bergerak per klik
+
+document.getElementById('moveLeft').addEventListener('click', function() {
+    position.x -= MOVE_AMOUNT; // Minus untuk bergerak ke kiri
+    draw();
+});
+
+document.getElementById('moveRight').addEventListener('click', function() {
+    position.x += MOVE_AMOUNT; // Plus untuk bergerak ke kanan
+    draw();
+});
+
+document.getElementById('moveUp').addEventListener('click', function() {
+    position.y -= MOVE_AMOUNT; // Minus untuk bergerak ke atas
+    draw();
+});
+
+document.getElementById('moveDown').addEventListener('click', function() {
+    position.y += MOVE_AMOUNT; // Plus untuk bergerak ke bawah
+    draw();
+});
+
+twibbon.src = 'twibbon.png'; // Make sure 'twibbon.png' is in the correct directory
+twibbon.onload = function() {
+    draw(); // Draw twibbon once it's loaded
+};
+
+$('#imageUpload').change(function (e) {
+    var file = e.target.files[0];
+    if (file) {
+        var reader = new FileReader();
+        reader.onload = function (event) {
+            image.src = event.target.result;
+            image.onload = function() {
+                reset();
+                draw();
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+function reset() {
+    scale = 1;
+    position = { x: 0, y: 0 };
+}
+
+function draw() {
+    var iw = image.width;
+    var ih = image.height;
+    var cw = canvas.width;
+    var ch = canvas.height;
+
+    var scaleFactor = Math.min(cw / iw, ch / ih);
+    var iwScaled = iw * scaleFactor * scale;
+    var ihScaled = ih * scaleFactor * scale;
+
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.save();
+    ctx.translate(cw / 2, ch / 2); // Center the image in the canvas
+    ctx.scale(scaleFactor * scale, scaleFactor * scale); // Scale the image
+    ctx.translate(-iw / 2 + position.x / (scaleFactor * scale), -ih / 2 + position.y / (scaleFactor * scale));
+    ctx.drawImage(image, 0, 0); // Draw the uploaded image
+    ctx.restore();
+    ctx.drawImage(twibbon, 0, 0, cw, ch); // Draw the twibbon overlay
+}
+
+function resizeCanvas() {
+    canvas.width = $('#canvasContainer').width();
+    canvas.height = canvas.width; // Maintain aspect ratio
+    draw();
+}
+
+$('#zoomControl').on('input', function() {
+    scale = parseFloat($(this).val());
+    draw();
+});
+
+canvas.addEventListener('mousedown', function(evt) {
+    dragStart = { x: evt.offsetX - position.x, y: evt.offsetY - position.y };
+    dragged = false;
+}, false);
+
+canvas.addEventListener('mousemove', function(evt) {
+    if (dragStart) {
+        position.x = evt.offsetX - dragStart.x;
+        position.y = evt.offsetY - dragStart.y;
+        draw();
+        dragged = true;
+    }
+}, false);
+
+canvas.addEventListener('mouseup', function(evt) {
+    dragStart = null;
+}, false);
+
+document.getElementById('saveImage').addEventListener('click', function() {
+    var dataURL = canvas.toDataURL('image/png');
+    var link = document.createElement('a');
+    link.download = 'twibbonized.png';
+    link.href = dataURL;
+    link.click();
+});
+
+$(window).resize(resizeCanvas);
+resizeCanvas(); // Resize the canvas to fit the container size initially
+
+</script>
+</body>
+</html>
